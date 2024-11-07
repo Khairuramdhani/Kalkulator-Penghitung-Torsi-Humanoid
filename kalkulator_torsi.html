@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Torsi Robot</title>
+<style>
+/* Gaya CSS seperti sebelumnya */
+body {
+font-family: Arial, sans-serif;
+background-color: #e6f7ff;
+display: flex;
+align-items: center;
+justify-content: center;
+min-height: 100vh;
+margin: 0;
+}
+
+.container {
+background-color: #ffffff;
+border-radius: 10px;
+padding: 20px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+width: 400px;
+text-align: center;
+}
+
+h1 {
+color: #333;
+font-size: 24px;
+margin-bottom: 20px;
+}
+
+label {
+display: block;
+margin-top: 10px;
+font-weight: bold;
+color: #333;
+text-align: left;
+}
+
+input {
+width: 100%;
+padding: 10px;
+margin-top: 5px;
+margin-bottom: 15px;
+border: 1px solid #ccc;
+border-radius: 5px;
+font-size: 16px;
+box-sizing: border-box;
+}
+
+.button {
+width: 100%;
+padding: 12px;
+font-size: 16px;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+margin-top: 10px;
+}
+
+.button-hitung {
+background-color: #4CAF50;
+color: white;
+}
+
+.button-reset {
+background-color: #f44336;
+color: white;
+}
+
+.button:hover {
+opacity: 0.9;
+}
+
+.result, .history {
+background-color: #f0f8ff;
+border-radius: 8px;
+padding: 15px;
+margin-top: 20px;
+font-size: 16px;
+color: #333;
+text-align: left;
+}
+
+.history {
+font-size: 14px;
+color: #555;
+max-height: 150px;
+overflow-y: auto;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>Kalkulator Torsi Robot</h1>
+
+<label for="tegak">Panjang sisi tegak (m):</label>
+<input type="text" id="tegak" placeholder="Masukkan panjang sisi tegak" required>
+
+<label for="miring">Panjang sisi miring (m):</label>
+<input type="text" id="miring" placeholder="Masukkan panjang sisi miring" required>
+
+<button class="button button-hitung" onclick="hitungTorsi()">Hitung</button>
+<button class="button button-reset" onclick="resetHistory()">Reset Riwayat</button>
+
+<div class="result" id="result">
+Sudut: - <br>
+Torsi: -
+</div>
+
+<div class="history" id="history">
+<strong>Riwayat Perhitungan:</strong><br>
+</div>
+</div>
+
+<script>
+const berat_robot = 3.35; // kilogram
+const gravitasi = 9.8; // m/s^2
+
+// Fungsi untuk menghitung torsi dan menyimpan riwayat ke Local Storage
+function hitungTorsi() {
+let tegak = document.getElementById("tegak").value.replace(",", ".");
+let miring = document.getElementById("miring").value.replace(",", ".");
+tegak = parseFloat(tegak);
+miring = parseFloat(miring);
+
+if (isNaN(tegak) || isNaN(miring) || miring < tegak) {
+alert("Masukkan panjang yang valid dan pastikan sisi miring lebih besar atau sama dengan sisi tegak.");
+return;
+}
+
+let sudutRadian = Math.asin(tegak / miring);
+let sudutDerajat = sudutRadian * (180 / Math.PI);
+let torsi = (gravitasi * berat_robot) * miring * Math.sin(sudutRadian);
+
+document.getElementById("result").innerHTML =
+`Sudut: ${sudutDerajat.toFixed(2)}°<br>Torsi: ${torsi.toFixed(2)} Nm`;
+
+let historyEntry = `Sisi Tegak: ${tegak} m, Sisi Miring: ${miring} m, Sudut: ${sudutDerajat.toFixed(2)}°, Torsi: ${torsi.toFixed(2)} Nm<br>`;
+saveToHistory(historyEntry);
+}
+
+// Fungsi untuk menyimpan entri ke Local Storage
+function saveToHistory(entry) {
+let history = localStorage.getItem("torsiHistory") || "";
+history += entry;
+localStorage.setItem("torsiHistory", history);
+loadHistory();
+}
+
+// Fungsi untuk memuat riwayat dari Local Storage
+function loadHistory() {
+document.getElementById("history").innerHTML = "<strong>Riwayat Perhitungan:</strong><br>" + (localStorage.getItem("torsiHistory") || "");
+}
+
+// Fungsi untuk menghapus riwayat dari Local Storage
+function resetHistory() {
+localStorage.removeItem("torsiHistory");
+loadHistory();
+}
+
+// Muat riwayat saat halaman pertama kali dimuat
+window.onload = loadHistory;
+</script>
+
+</body>
+</html>
